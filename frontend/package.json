@@ -10,6 +10,7 @@
     "@types/node": "^16.18.38",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
+    "minimatch": "^9.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
@@ -17,11 +18,12 @@
     "web-vitals": "^2.1.4"
   },
   "lint-staged": {
-    "frontend/src/**/*.{js,jsx,ts,tsx}": [
+    "src/**/*.{js,jsx,ts,tsx}": [
       "eslint --fix",
       "prettier --write",
       "tsc --noEmit",
-      "jest"
+      "jest",
+      "git add"
     ]
   },
   "scripts": {
@@ -31,9 +33,9 @@
     "test": "jest",
     "eject": "react-scripts eject",
     "type-check": "tsc --noEmit",
-    "lint": "eslint 'frontend/src/**/*.{ts,tsx}'",
-    "format-check": "prettier --check 'frontend/src/**/*.{ts,tsx}'",
-    "format": "prettier --write 'frontend/src/**/*.{ts,tsx}'"
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "format-check": "prettier --check 'src/**/*.{ts,tsx}'",
+    "format": "prettier --write 'src/**/*.{ts,tsx}'"
   },
   "eslintConfig": {
     "extends": [
