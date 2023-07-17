@@ -21,8 +21,7 @@
       "eslint --fix",
       "prettier --write",
       "tsc --noEmit",
-      "jest",
-      "git add"
+      "jest"
     ]
   },
   "scripts": {
