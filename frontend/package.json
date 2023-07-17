@@ -31,9 +31,9 @@
     "test": "jest",
     "eject": "react-scripts eject",
     "type-check": "tsc --noEmit",
-    "lint": "eslint 'src/**/*.{ts,tsx}'",
-    "format-check": "prettier --check 'src/**/*.{ts,tsx}'",
-    "format": "prettier --write 'src/**/*.{ts,tsx}'"
+    "lint": "eslint 'frontend/src/**/*.{ts,tsx}'",
+    "format-check": "prettier --check 'frontend/src/**/*.{ts,tsx}'",
+    "format": "prettier --write 'frontend/src/**/*.{ts,tsx}'"
   },
   "eslintConfig": {
     "extends": [
