@@ -1,0 +1,120 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: An AWS Serverless Specification template describing infrastructre for React website hosted on S3
+
+Parameters:
+  WwwDomainName:
+    Type: String
+    Description: Domain name to be used for the website.
+    Default: www.bluecollarverse.com
+  WwwBucketName:
+    Type: String
+    Description: Www bucket name
+    Default: www.bluecollarverse.com
+  RootHostedZone:
+    Type: String
+    Description: Root Hosted Zone that manager root domain
+
+Resources:
+  # Certificates
+  WwwCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref WwwDomainName
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Ref WwwDomainName
+          HostedZoneId: !Ref RootHostedZone
+
+  WwwBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref WwwBucketName
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        # ErrorDocument: error.html
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        IgnorePublicAcls: false
+        BlockPublicPolicy: false
+        RestrictPublicBuckets: false
+
+  WwwBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    DeletionPolicy: Retain
+    DependsOn:
+      - WwwBucket
+      - WwwCloudFrontDistributionIdentity
+    Properties:
+      Bucket: !Ref WwwBucket
+      PolicyDocument:
+        Statement:
+          - Action: s3:GetObject
+            Effect: Allow
+            Resource: !Sub "arn:aws:s3:::${WwwBucket}/*"
+            Principal:
+              CanonicalUser: !GetAtt WwwCloudFrontDistributionIdentity.S3CanonicalUserId
+          - Action: s3:GetObject
+            Effect: Allow
+            Resource: !Sub "arn:aws:s3:::${WwwBucket}/*"
+            Principal: "*"
+            Sid: PublicReadGetObject
+
+  WwwRecordSet:
+    Type: AWS::Route53::RecordSet
+    DependsOn:
+      - WwwCloudFrontDistribution
+    Properties:
+      HostedZoneId: !Ref RootHostedZone
+      Name: !Ref WwwDomainName
+      Type: CNAME
+      TTL: "60"
+      ResourceRecords:
+        - !GetAtt WwwCloudFrontDistribution.DomainName
+  # Cloud Front
+  WwwCloudFrontDistributionIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: Access identity for www s3 bucket
+
+  WwwCloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    DependsOn:
+      - WwwCloudFrontDistributionIdentity
+      - WwwBucket
+      - WwwCertificate
+    Properties:
+      DistributionConfig:
+        Aliases:
+          - !Ref WwwDomainName
+        Origins:
+          - DomainName: !GetAtt WwwBucket.DomainName
+            Id: MyS3Origin
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${WwwCloudFrontDistributionIdentity}
+        Enabled: true
+        DefaultRootObject: index.html
+        DefaultCacheBehavior:
+          TargetOriginId: MyS3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
+          AllowedMethods:
+            - HEAD
+            - GET
+        ViewerCertificate:
+          AcmCertificateArn: !Ref WwwCertificate
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
+        HttpVersion: http2
+
+Outputs:
+  WwwCloudFrontDistributionIdOutput:
+    Description: Www CloudFront Distribution ID
+    Value: !Ref WwwCloudFrontDistribution
+  WwwBucketNameOutput:
+    Description: Www bucket
+    Value: !Ref WwwBucket
