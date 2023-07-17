@@ -1,2 +1,5 @@
 # AWS SAM
 .aws-sam
+
+# CI/CD
+.secrets
