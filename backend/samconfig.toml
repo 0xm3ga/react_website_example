@@ -1,0 +1,9 @@
+version = 0.1
+[default.deploy.parameters]
+stack_name = "react-website-example"
+resolve_s3 = true
+s3_prefix = "react-website-example"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "WwwDomainName=\"www.bluecollarverse.com\" WwwBucketName=\"www.bluecollarverse.com\" RootHostedZone=\"Z03043642OPWWK7FLQJE6\""
+image_repositories = []
